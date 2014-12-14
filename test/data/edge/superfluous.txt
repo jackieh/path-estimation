@@ -1,0 +1,21 @@
+{
+  "key": "value",
+  "target": "train",
+  "hello": "world",
+  "reports": [
+    {
+      "reporter": "bob",
+      "y": 0.0,
+      "timestamp": 0.0,
+      "x": 0.0,
+    },
+    {
+      "reporter": "jane",
+      "y": 1.0,
+      "timestamp": 1.0,
+      "reporting_method": "yo",
+      "x": 1.0
+    }
+  ],
+  "foo": "bar"
+}

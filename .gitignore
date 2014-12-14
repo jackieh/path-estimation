@@ -1,0 +1,6 @@
+estimate
+*.a
+*.o
+TODO
+doc/
+test/out/*

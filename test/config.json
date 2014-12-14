@@ -1,0 +1,81 @@
+/**
+ * Simple moving average:
+ *
+ *   Specify the value of "sma" to be a list of objects, each with integer
+ *   field "iterations" with the number of iterations, and integer field
+ *   "samples" with the number of samples to factor into each average.
+ *
+ *
+ * Exponential smoothing:
+ *
+ *   Specify the value of "es" to be a list of objects, each with integer
+ *   field "iterations" with the number of iterations, and double field
+ *   "smoothing" with the smoothing factor.
+ *
+ *
+ * Kalman filter:
+ *
+ *   Specify the value of "kf" to be a boolean, with value true if we want to
+ *   analyze the input data with a Kalman filter.
+ */
+
+{
+  // Simple moving average constants.
+  "sma": [
+    {
+      "iterations": 1,
+      "samples": 2
+    },
+    {
+      "iterations": 1,
+      "samples": 10
+    },
+    {
+      "iterations": 1,
+      "samples": 40
+    },
+    {
+      "iterations": 40,
+      "samples": 2
+    },
+    {
+      "iterations": 20,
+      "samples": 3
+    },
+    {
+      "iterations": 10,
+      "samples": 5
+    }
+  ],
+
+  // Exponential smoothing constants.
+  "es": [
+    {
+      "iterations": 1,
+      "smoothing": 0.1
+    },
+    {
+      "iterations": 1,
+      "smoothing": 0.25
+    },
+    {
+      "iterations": 1,
+      "smoothing": 0.5
+    },
+    {
+      "iterations": 20,
+      "smoothing": 0.5
+    },
+    {
+      "iterations": 50,
+      "smoothing": 0.75
+    },
+    {
+      "iterations": 75,
+      "smoothing": 0.95
+    }
+  ],
+
+  // Kalman filter.
+  "kf": true
+}

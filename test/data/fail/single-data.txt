@@ -1,0 +1,10 @@
+{
+  "target": "train",
+  "reports": [
+    {
+      "y": 0.0,
+      "timestamp": 0.0,
+      "x": 0.0
+    }
+  ]
+}
