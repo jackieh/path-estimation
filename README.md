@@ -22,9 +22,6 @@ The test code which uses the library has the following dependencies.
 The Makefile has a `test` target to compile a test program that uses the
 library. The `run` target will run the test code on an example input.
 
-### Developing
-
-A lint wrapper script is included to help verify the quality of any code in the
-`src` directory.
+### Documentation
 
 The `docs` target in the Makefile will generate doxygen documentation.

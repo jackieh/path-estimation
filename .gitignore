@@ -1,6 +1,8 @@
-estimate
 *.a
 *.o
 TODO
 doc/
+estimate
+lint.sh
 test/out/*
+utils
