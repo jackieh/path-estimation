@@ -43,7 +43,12 @@ typedef std::pair<int, double> es_param_t;
 typedef std::vector<sma_param_t> sma_params_t;
 typedef std::vector<es_param_t> es_params_t;
 
-typedef struct analysis_params {
+typedef struct AnalysisParams {
+  AnalysisParams() :
+    sma_params(std::vector<sma_param_t>()),
+    es_params(std::vector<es_param_t>()), use_kf(false) {}
+  ~AnalysisParams() {}
+
   sma_params_t sma_params;
   es_params_t es_params;
   bool use_kf;

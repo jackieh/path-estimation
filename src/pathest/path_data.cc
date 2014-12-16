@@ -14,11 +14,7 @@
 
 namespace pathest {
 
-Location::Location(double x, double y, double t) {
-  this->x_ = x;
-  this->y_ = y;
-  this->t_ = t;
-}
+Location::Location(double x, double y, double t) : x_(x), y_(y), t_(t) {}
 
 bool Location::comp_x(const Location &loc1, const Location &loc2) {
   return loc1.x() < loc2.x();
@@ -36,7 +32,7 @@ double Location::x() const { return this->x_; }
 double Location::y() const { return this->y_; }
 double Location::t() const { return this->t_; }
 
-PathData::PathData() { this->data_ = std::vector<Location>(); }
+PathData::PathData() : data_(std::vector<Location>()) {}
 
 bool PathData::empty() const { return this->data_.empty(); }
 

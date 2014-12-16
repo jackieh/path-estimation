@@ -6,6 +6,8 @@
 #ifndef TEST_RESULTS_H_
 #define TEST_RESULTS_H_
 
+#include <string>
+
 #include "pathest/path_data.h"
 
 class Results {
@@ -16,8 +18,8 @@ class Results {
   void write(const char *, const char *, const pathest::PathData &) const;
 
  private:
-  const char *output_dir;
-  pathest::PathData reference_data;
+  std::string out_dir_;
+  pathest::PathData ref_data_;
 
   double x_min_;
   double x_max_;
