@@ -101,8 +101,6 @@ void Results::write_plot(const char *name, const char *title,
       assert((t_max - t_min) != 0);
 #endif
       plcol1((t - t_min) / (t_max - t_min));
-      (void)x;
-      (void)y;
       plpoin(1, &x, &y, DOT);
     }
   }
