@@ -1,5 +1,0 @@
-{
-  boolean, true:T
-  boolean, false:F
-  null:null
-}

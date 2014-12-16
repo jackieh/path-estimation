@@ -7,14 +7,14 @@
 
 #include <assert.h>
 #include <math.h>
-#include <plplot/plplot.h>
-#include <plplot/plstream.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <vector>
 
+#include "json/json.h"
 #include "pathest/path_data.h"
+#include "plplot/plplot.h"
+#include "plplot/plstream.h"
 
 // PLplot constants.
 #define WHITE 15           // Plot environment color white.
@@ -110,8 +110,8 @@ void Results::write_plot(const char *name, const char *title,
   fprintf(stdout, "Wrote plot to %s\n", &plot_path[0]);
 }
 
-void Results::write_json
-(const char *name, const pathest::PathData &output) const {
+void Results::write_json(const char *name, const pathest::PathData &output)
+  const {
 #ifdef DEBUG
   // Invariant: no invalid parameters.
   assert(name != NULL);
@@ -119,31 +119,25 @@ void Results::write_json
   size_t json_path_len = txt_path_len + strlen(this->output_dir) + strlen(name);
   std::vector<char> json_path(json_path_len);
   snprintf(&json_path[0], json_path_len, txt_path_fmt, this->output_dir, name);
+
+  Json::Value reports = Json::Value(Json::arrayValue);
+  for (pathest::PathData::const_iterator it = output.begin();
+       it != output.end(); ++it) {
+    Json::Value location;
+    location["x"] = it->x();
+    location["y"] = it->y();
+    location["timestamp"] = it->t();
+    reports.append(location);
+  }
+
+  Json::Value root;
+  root["target"] = "trains";
+  root["reports"] = reports;
+
   FILE *fp = fopen(&json_path[0], "w");
   if (fp) {
-    fprintf(fp,
-            "{\n"
-            "  \"target\": \"train\",\n"
-            "  \"reports\": [\n");
-    bool first = true;
-    for (pathest::PathData::const_iterator it = output.begin();
-         it != output.end(); ++it) {
-      if (first) {
-        first = false;
-      } else {
-        fprintf(fp, ",\n");
-      }
-      fprintf(fp,
-              "    {\n"
-              "      \"y\": %f,\n"
-              "      \"timestamp\": %f,\n"
-              "      \"x\": %f\n"
-              "    }", it->y(), it->t(), it->x());
-    }
-    fprintf(fp,
-            "\n"
-            "  ]\n"
-            "}\n");
+    Json::StyledWriter writer;
+    fprintf(fp, writer.write(root).c_str());
     fclose(fp);
     fprintf(stdout, "Wrote data to %s\n", &json_path[0]);
   } else {
@@ -151,8 +145,8 @@ void Results::write_json
   }
 }
 
-void Results::write_error
-(const char *title, const pathest::PathData &output) const {
+void Results::write_error(const char *title, const pathest::PathData &output)
+  const {
 #ifdef DEBUG
   // Invariant: no invalid parameters.
   assert(title != NULL);
@@ -196,8 +190,7 @@ void Results::init_report() const {
   }
 }
 
-double Results::mean_absolute_error
-(const pathest::PathData &output) const {
+double Results::mean_absolute_error(const pathest::PathData &output) const {
 #ifdef DEBUG
   // Invariant: output has the same number of data points as reference.
   if (!this->reference_data.empty()) {
@@ -230,8 +223,7 @@ double Results::mean_absolute_error
   }
 }
 
-double Results::root_mean_square_error
-(const pathest::PathData &output) const {
+double Results::root_mean_square_error(const pathest::PathData &output) const {
 #ifdef DEBUG
   // Invariant: output has the same number of data points as reference.
   if (!this->reference_data.empty()) {
@@ -263,8 +255,8 @@ double Results::root_mean_square_error
   }
 }
 
-double Results::mean_absolute_scaled_error
-(const pathest::PathData &output) const {
+double Results::mean_absolute_scaled_error(const pathest::PathData &output)
+  const {
 #ifdef DEBUG
   // Invariant: output has the same number of data points as reference.
   if (!this->reference_data.empty()) {

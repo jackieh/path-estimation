@@ -3,11 +3,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <stdio.h>
-#include <string.h>
 #include <sys/stat.h>
-#include <memory>
 
-#include "nxjson/nxjson.h"
+#include "json/json.h"
 #include "pathest/path_data.h"
 #include "test/analysis.h"
 #include "test/parse.h"
@@ -54,48 +52,49 @@ int main(int argc, const char *argv[]) {
 }
 
 bool parse_data(const char *filename, pathest::PathData *data) {
-  // Check and read a file.
-  struct stat st;
-  if (!check_file(filename, &st)) return false;
-  FILE *fp = fopen(filename, "rb");
-  if (!check_stream(filename, fp)) return false;
-  std::vector<char> buf(st.st_size + 1);
-  buf[st.st_size] = '\0';
-  if (!read_file(filename, &buf[0], (size_t)st.st_size, fp)) return false;
-  const nx_json *json = nx_json_parse_utf8(&buf[0]);
-  if (!check_json(json)) return false;
+  Json::Value root;
+  if (!get_json(filename, &root)) return false;
 
-  // Find string property "target" and array property "reports".
-  nx_json *target = find_property(json, NX_JSON_STRING, "target");
-  nx_json *reports = find_property(json, NX_JSON_ARRAY, "reports");
-  if (!check_property(json, target, "target")) return false;
-  if (!check_property(json, reports, "reports")) return false;
-
-  // Check the "target" property.
-  if (!target->text_value || strcmp(target->text_value, "train")) {
-    fprintf(stderr, "Unexpected JSON format: wrong \"target\" value\n");
-    nx_json_free(json);
+  // Get properties.
+  Json::Value target = root["target"];
+  Json::Value reports = root["reports"];
+  if (!target.isString()) {
+    fprintf(stderr, "\"target\" string not found in JSON input\n");
+    return false;
+  } else if (target.asString().compare("train")) {
+    fprintf(stderr, "Unexpected \"target\" value in JSON input\n");
+    return false;
+  } else if (!reports.isArray()) {
+    fprintf(stderr, "\"reports\" list not found in JSON input\n");
     return false;
   }
 
-  // Check the "reports" property, and add elements.
-  for (nx_json *report = reports->child; report; report = report->next) {
-    nx_json *x = find_property(report, NX_JSON_DOUBLE, "x");
-    nx_json *y = find_property(report, NX_JSON_DOUBLE, "y");
-    nx_json *timestamp = find_property(report, NX_JSON_DOUBLE, "timestamp");
-
-    // Skip over a report if it doesn't have all three data points.
-    if (!x) {
-      fprintf(stderr, "Warning: \"x\" property not found\n");
-    } else if (!y) {
-      fprintf(stderr, "Warning: \"y\" property not found\n");
-    } else if (!timestamp) {
-      fprintf(stderr, "Warning: \"timestamp\" property not found\n");
-    } else {
-      data->add_point(x->dbl_value, y->dbl_value, timestamp->dbl_value);
+  // Add data.
+  for (unsigned i = 0; i < reports.size(); ++i) {
+    if (reports[i].isObject()) {
+      Json::Value x = reports[i]["x"];
+      Json::Value y = reports[i]["y"];
+      Json::Value t = reports[i]["timestamp"];
+      if (x.isDouble() && y.isDouble() && t.isDouble()) {
+        data->add_point(x.asDouble(), y.asDouble(), t.asDouble());
+      }
     }
   }
 
-  nx_json_free(json);
-  return check_data(*data, true);
+  // Verify data.
+  if (data->empty()) {
+    fprintf(stderr, "Invalid data: empty data set\n");
+    return false;
+  } else if (data->min_t() == data->max_t()) {
+    fprintf(stderr, "Invalid data: identical timestamps\n");
+    return false;
+  } else if (data->min_x() == data->max_x()) {
+    fprintf(stderr, "Invalid data: identical x values\n");
+    return false;
+  } else if (data->min_y() == data->max_y()) {
+    fprintf(stderr, "Invalid data: identical y values\n");
+    return false;
+  } else {
+    return true;
+  }
 }

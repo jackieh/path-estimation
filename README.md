@@ -14,8 +14,7 @@ The library itself has the following dependencies.
 The test code which uses the library has the following dependencies.
 
 - [PLplot](http://plplot.sourceforge.net/) for path visualization
-- [NXJSON](https://bitbucket.org/yarosla/nxjson) for JSON parsing, already
-  included in this repository
+- [JsonCpp](https://github.com/open-source-parsers/jsoncpp) for JSON parsing
 
 ### Building and testing
 

@@ -25,11 +25,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <utility>
 #include <vector>
 
-#include "nxjson/nxjson.h"
+#include "json/json.h"
 #include "pathest/estimation.h"
 #include "pathest/path_data.h"
 #include "test/parse.h"
@@ -122,62 +121,45 @@ void perform_analysis(const char *config, const pathest::PathData &input,
 }
 
 bool parse_params(const char *filename, analysis_params_t *params) {
-  // Default parameter values.
-  params->use_kf = false;
+  Json::Value root;
+  if (!get_json(filename, &root)) return false;
 
-  // Check and parse a file.
-  struct stat st;
-  if (!check_file(filename, &st)) return false;
-  FILE *fp = fopen(filename, "rb");
-  if (!check_stream(filename, fp)) return false;
-  std::vector<char> buf(st.st_size + 1);
-  buf[st.st_size] = '\0';
-  if (!read_file(filename, &buf[0], (size_t)st.st_size, fp)) return false;
-  const nx_json *json = nx_json_parse_utf8(&buf[0]);
-  if (!check_json(json)) return false;
+  Json::Value sma = root["sma"];
+  Json::Value es = root["es"];
+  Json::Value kf = root.get("kf", false);
 
-  // Find "sma" and "es" and "kf" properties.
-  nx_json *sma = find_property(json, NX_JSON_ARRAY, "sma");
-  nx_json *es = find_property(json, NX_JSON_ARRAY, "es");
-  nx_json *kf = find_property(json, NX_JSON_BOOL, "kf");
+  // Kalman filter parameters.
+  if (kf.isBool()) params->use_kf = kf.asBool();
 
-  // Check the "kf" property and add parameters.
-  if (kf) params->use_kf = kf->int_value ? true : false;
-
-  // Check the "sma" property and add parameters.
-  if (sma) {
-    for (nx_json *elem = sma->child; elem; elem = elem->next) {
-      if (elem->type == NX_JSON_OBJECT) {
-        int iterations = 0;
-        int samples = 0;
-        nx_json *it_prop = find_property(elem, NX_JSON_INTEGER, "iterations");
-        nx_json *sa_prop = find_property(elem, NX_JSON_INTEGER, "samples");
-        if (it_prop) iterations = it_prop->int_value;
-        if (sa_prop) samples = sa_prop->int_value;
-        if (iterations > 0 && samples > 0) {
-          params->sma_params.push_back(sma_param_t(iterations, samples));
+  // Simple moving average parameters.
+  if (sma.isArray()) {
+    for (unsigned i = 0; i < sma.size(); ++i) {
+      if (sma[i].isObject()) {
+        Json::Value iterations = sma[i]["iterations"];
+        Json::Value samples = sma[i]["samples"];
+        if (iterations.isInt() && samples.isInt()) {
+          int i = iterations.asInt();
+          int s = iterations.asInt();
+          if (i > 0 && s > 0) params->sma_params.push_back(sma_param_t(i, s));
         }
       }
     }
   }
 
-  // Check the "es" property and add parameters.
-  if (es) {
-    for (nx_json *elem = es->child; elem; elem = elem->next) {
-      if (elem->type == NX_JSON_OBJECT) {
-        int iterations = 0;
-        double smoothing = -1.0;
-        nx_json *it_prop = find_property(elem, NX_JSON_INTEGER, "iterations");
-        nx_json *sm_prop = find_property(elem, NX_JSON_DOUBLE, "smoothing");
-        if (it_prop) iterations = it_prop->int_value;
-        if (sm_prop) smoothing = sm_prop->dbl_value;
-        if (iterations > 0 && smoothing >= 0 && smoothing <= 1.0) {
-          params->es_params.push_back(es_param_t(iterations, smoothing));
+  // Exponential smoothing parameters.
+  if (es.isArray()) {
+    for (unsigned i = 0; i < es.size(); ++i) {
+      Json::Value iterations = es[i]["iterations"];
+      Json::Value smoothing = es[i]["smoothing"];
+      if (iterations.isInt() && smoothing.isDouble()) {
+        int i = iterations.asInt();
+        double s = smoothing.asDouble();
+        if (i > 0 && s >= 0 && s <= 1) {
+          params->es_params.push_back(es_param_t(i, s));
         }
       }
     }
   }
 
-  nx_json_free(json);
   return true;
 }
