@@ -15,7 +15,6 @@
 #include "pathest/exponential_smoothing.h"
 #include "pathest/kalman_filter.h"
 #include "pathest/location.h"
-#include "pathest/path.h"
 #include "pathest/simple_moving_average.h"
 
 namespace pathest {
