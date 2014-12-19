@@ -6,13 +6,13 @@
 #include <sys/stat.h>
 
 #include "json/json.h"
-#include "pathest/path_data.h"
+#include "pathest/path.h"
 #include "test/analysis.h"
 #include "test/parse.h"
 #include "test/results.h"
 
 // Fill an existing data object with the contents of a given file.
-bool parse_data(const char *, pathest::PathData *);
+bool parse_data(const char *, pathest::Path *);
 
 int main(int argc, const char *argv[]) {
   if (argc < 4) {
@@ -22,7 +22,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // Gather input data.
-  pathest::PathData report_data;
+  pathest::Path report_data;
   if (!parse_data(argv[2], &report_data)) {
     fprintf(stderr, "Failed to read input data from %s\n", argv[2]);
     return -1;
@@ -38,7 +38,7 @@ int main(int argc, const char *argv[]) {
 
   // Check for optional reference file. Continue if there is an error.
   if (argc > 4) {
-    pathest::PathData reference_data;
+    pathest::Path reference_data;
     if (parse_data(argv[4], &reference_data)) {
       res.add_reference(reference_data);
     } else {
@@ -51,7 +51,7 @@ int main(int argc, const char *argv[]) {
   return 0;
 }
 
-bool parse_data(const char *filename, pathest::PathData *data) {
+bool parse_data(const char *filename, pathest::Path *data) {
   Json::Value root;
   if (!get_json(filename, &root)) return false;
 
@@ -76,7 +76,7 @@ bool parse_data(const char *filename, pathest::PathData *data) {
       Json::Value y = reports[i]["y"];
       Json::Value t = reports[i]["timestamp"];
       if (x.isDouble() && y.isDouble() && t.isDouble()) {
-        data->add_point(x.asDouble(), y.asDouble(), t.asDouble());
+        data->insert(x.asDouble(), y.asDouble(), t.asDouble());
       }
     }
   }

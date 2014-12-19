@@ -6,11 +6,11 @@
 #ifndef TEST_ANALYSIS_H_
 #define TEST_ANALYSIS_H_
 
-#include "pathest/path_data.h"
+#include "pathest/path.h"
 #include "test/results.h"
 
 /// @brief Perform analysis on the input data based on the given config file.
-void perform_analysis(const char *config, const pathest::PathData &input,
+void perform_analysis(const char *config, const pathest::Path &input,
                       const Results &res);
 
 #endif  // TEST_ANALYSIS_H_

@@ -8,8 +8,11 @@ LIB_DIR = $(SRC)/pathest
 LIB_OUT = $(TOP)/libpathest.a
 LIB_FLAGS = -I$(SRC) $(FLAGS)
 LIB_SOURCES = \
-	$(LIB_DIR)/path_data.cc \
-	$(LIB_DIR)/estimation.cc
+	$(LIB_DIR)/exponential_smoothing.cc \
+	$(LIB_DIR)/kalman_filter.cc \
+	$(LIB_DIR)/location.cc \
+	$(LIB_DIR)/path.cc \
+	$(LIB_DIR)/simple_moving_average.cc
 LIB_OBJECTS = $(LIB_SOURCES:.cc=.o)
 
 # Test (test target)

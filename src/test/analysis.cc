@@ -29,8 +29,7 @@
 #include <vector>
 
 #include "json/json.h"
-#include "pathest/estimation.h"
-#include "pathest/path_data.h"
+#include "pathest/path.h"
 #include "test/parse.h"
 #include "test/results.h"
 
@@ -74,12 +73,12 @@ const char *kf_title = "Kalman filter";
 // Fill an existing params struct with the contents of a given file.
 bool parse_params(const char *, analysis_params_t *);
 
-void perform_analysis(const char *config, const pathest::PathData &input,
+void perform_analysis(const char *config, const pathest::Path &input,
                       const Results &res) {
   analysis_params_t params;
   if (parse_params(config, &params)) {
     uint32_t count;
-    pathest::PathData est_data;
+    pathest::Path est_data;
 
     // Simple moving average analysis.
     count = 0;
@@ -89,7 +88,7 @@ void perform_analysis(const char *config, const pathest::PathData &input,
       int iterations = it->first;
       int samples = it->second;
       for (int i = 0; i < iterations; ++i) {
-        est_data = simple_moving_average(samples, est_data);
+        est_data = est_data.simple_moving_average(samples);
       }
       std::vector<char> name(sma_name_len);
       std::vector<char> title(sma_title_len);
@@ -107,7 +106,7 @@ void perform_analysis(const char *config, const pathest::PathData &input,
       int iterations = it->first;
       double smoothing = it->second;
       for (int i = 0; i < iterations; ++i) {
-        est_data = exp_moving_average(smoothing, est_data);
+        est_data = est_data.exponential_smoothing(smoothing);
       }
       std::vector<char> name(es_name_len);
       std::vector<char> title(es_title_len);
@@ -119,7 +118,7 @@ void perform_analysis(const char *config, const pathest::PathData &input,
 
     // Kalman filter analysis.
     if (params.use_kf) {
-      est_data = kalman_filter(input);
+      est_data = input.kalman_filter();
       res.write(kf_name, kf_title, est_data);
     }
   }

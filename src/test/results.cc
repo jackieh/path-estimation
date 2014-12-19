@@ -13,9 +13,10 @@
 #include <vector>
 
 #include "json/json.h"
-#include "pathest/path_data.h"
 #include "plplot/plplot.h"
 #include "plplot/plstream.h"
+#include "pathest/location.h"
+#include "pathest/path.h"
 
 // PLplot constants.
 #define WHITE 15           // Plot environment color white.
@@ -40,36 +41,35 @@ const char *svg_path_fmt = "%s/%s.svg";
 const size_t txt_path_len = strlen(txt_path_fmt) + 1 - 4;
 const size_t svg_path_len = strlen(svg_path_fmt) + 1 - 4;
 
-Results::Results(const char *dir, const pathest::PathData &input) :
+Results::Results(const char *dir, const pathest::Path &input) :
   out_dir_(std::string(dir, strlen(dir))),
-  ref_data_(pathest::PathData()),
+  ref_data_(pathest::Path()),
   x_min_(input.min_x()), x_max_(input.max_x()),
   y_min_(input.min_y()), y_max_(input.max_y()) {
   this->init_report();
 }
 
-void Results::add_reference(const pathest::PathData &ref) {
+void Results::add_reference(const pathest::Path &ref) {
 #ifdef DEBUG
   // Invariant: do not set reference to more than one data set.
   assert(this->ref_data_.empty());
 #endif
   if (ref.empty()) fprintf(stderr, "Warning: using empty reference data\n");
-  for (pathest::PathData::const_iterator it = ref.begin(); it != ref.end();
-       ++it) {
-    this->ref_data_.add_point(it->x(), it->y(), it->t());
+  for (pathest::Path::const_iterator it = ref.begin(); it != ref.end(); ++it) {
+    this->ref_data_.insert(it->x(), it->y(), it->t());
   }
   this->write("reference", "Reference data", this->ref_data_);
 }
 
 void Results::write(const char *name, const char *title,
-                    const pathest::PathData &output) const {
+                    const pathest::Path &output) const {
   this->write_json(name, output);
   this->write_error(title, output);
   this->write_plot(name, title, output);
 }
 
 void Results::write_plot(const char *name, const char *title,
-                         const pathest::PathData &output) const {
+                         const pathest::Path &output) const {
 #ifdef DEBUG
   // Invariant: no invalid parameters.
   assert(name != NULL);
@@ -91,8 +91,8 @@ void Results::write_plot(const char *name, const char *title,
   double t_min = output.min_t();
   double t_max = output.max_t();
   if (t_max != t_min) {
-    for (pathest::PathData::const_iterator it = output.begin();
-         it != output.end(); ++it) {
+    for (pathest::Path::const_iterator it = output.begin(); it != output.end();
+         ++it) {
       double x = it->x();
       double y = it->y();
       double t = it->t();
@@ -108,7 +108,7 @@ void Results::write_plot(const char *name, const char *title,
   fprintf(stdout, "Wrote plot to %s\n", &plot_path[0]);
 }
 
-void Results::write_json(const char *name, const pathest::PathData &output)
+void Results::write_json(const char *name, const pathest::Path &output)
   const {
 #ifdef DEBUG
   // Invariant: no invalid parameters.
@@ -120,8 +120,8 @@ void Results::write_json(const char *name, const pathest::PathData &output)
            name);
 
   Json::Value reports = Json::Value(Json::arrayValue);
-  for (pathest::PathData::const_iterator it = output.begin();
-       it != output.end(); ++it) {
+  for (pathest::Path::const_iterator it = output.begin(); it != output.end();
+       ++it) {
     Json::Value location;
     location["x"] = it->x();
     location["y"] = it->y();
@@ -144,7 +144,7 @@ void Results::write_json(const char *name, const pathest::PathData &output)
   }
 }
 
-void Results::write_error(const char *title, const pathest::PathData &output)
+void Results::write_error(const char *title, const pathest::Path &output)
   const {
 #ifdef DEBUG
   // Invariant: no invalid parameters.
@@ -189,7 +189,7 @@ void Results::init_report() const {
   }
 }
 
-double Results::mean_absolute_error(const pathest::PathData &output) const {
+double Results::mean_absolute_error(const pathest::Path &output) const {
 #ifdef DEBUG
   // Invariant: output has the same number of data points as reference.
   if (!this->ref_data_.empty()) {
@@ -201,8 +201,8 @@ double Results::mean_absolute_error(const pathest::PathData &output) const {
   } else {
     double sum = 0.0;
     double num = 0.0;
-    pathest::PathData::const_iterator out_it = output.begin();
-    pathest::PathData::const_iterator ref_it = this->ref_data_.begin();
+    pathest::Path::const_iterator out_it = output.begin();
+    pathest::Path::const_iterator ref_it = this->ref_data_.begin();
     while (out_it != output.end() && ref_it != this->ref_data_.end()) {
       double x_squared = pow(out_it->x() - ref_it->x(), 2);
       double y_squared = pow(out_it->y() - ref_it->y(), 2);
@@ -222,7 +222,7 @@ double Results::mean_absolute_error(const pathest::PathData &output) const {
   }
 }
 
-double Results::root_mean_square_error(const pathest::PathData &output) const {
+double Results::root_mean_square_error(const pathest::Path &output) const {
 #ifdef DEBUG
   // Invariant: output has the same number of data points as reference.
   if (!this->ref_data_.empty()) {
@@ -234,8 +234,8 @@ double Results::root_mean_square_error(const pathest::PathData &output) const {
   } else {
     double sum = 0.0;
     double num = 0.0;
-    pathest::PathData::const_iterator out_it = output.begin();
-    pathest::PathData::const_iterator ref_it = this->ref_data_.begin();
+    pathest::Path::const_iterator out_it = output.begin();
+    pathest::Path::const_iterator ref_it = this->ref_data_.begin();
     while (out_it != output.end() && ref_it != this->ref_data_.end()) {
       double dx = out_it->x() - ref_it->x();
       double dy = out_it->y() - ref_it->y();
@@ -253,7 +253,7 @@ double Results::root_mean_square_error(const pathest::PathData &output) const {
   }
 }
 
-double Results::mean_absolute_scaled_error(const pathest::PathData &output)
+double Results::mean_absolute_scaled_error(const pathest::Path &output)
   const {
 #ifdef DEBUG
   // Invariant: output has the same number of data points as reference.
@@ -266,7 +266,7 @@ double Results::mean_absolute_scaled_error(const pathest::PathData &output)
   } else {
     double sum = 0.0;
     double num = 0.0;
-    pathest::PathData::const_iterator it = this->ref_data_.begin();
+    pathest::Path::const_iterator it = this->ref_data_.begin();
     double prev_x = it->x();
     double prev_y = it->y();
     ++it;
@@ -292,8 +292,8 @@ double Results::mean_absolute_scaled_error(const pathest::PathData &output)
 
     sum = 0.0;
     num = 0.0;
-    pathest::PathData::const_iterator out_it = output.begin();
-    pathest::PathData::const_iterator ref_it = this->ref_data_.begin();
+    pathest::Path::const_iterator out_it = output.begin();
+    pathest::Path::const_iterator ref_it = this->ref_data_.begin();
     while (out_it != output.end() && ref_it != this->ref_data_.end()) {
       double dx = out_it->x() - ref_it->x();
       double dy = out_it->y() - ref_it->y();
