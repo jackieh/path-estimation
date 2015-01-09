@@ -33,24 +33,6 @@ _REPORT_TEMPLATE = {"target": "train"}
 
 _REPORT_KEY = "reports"
 
-_REPORT_BEGIN = """{
-  "target": "train",
-  "reports": ["""
-
-_REPORT_POINT = """
-    {
-      "y": %f,
-      "timestamp": %f,
-      "x": %f
-    }"""
-
-_REPORT_DELIMITER = ","
-
-_REPORT_END = """
-  ]
-}
-"""
-
 
 def filename(i):
     """Return a pair of file paths for a given id number."""
