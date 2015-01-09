@@ -16,8 +16,8 @@ import os
 import shutil
 import subprocess
 
-_BIN = "estimate"
-_CONFIG = "test/config.json"
+_BIN = "./estimate"
+_CONFIG = "./test/config.json"
 
 _TEST_EXT = ".txt"
 _REF_EXT = ".ref"
@@ -29,6 +29,16 @@ _GEN_DIR = "generated"
 _FAIL_DIR = "fail"
 _EDGE_DIR = "edge"
 _DEMO_DIR = "given"
+
+
+def green_text(text):
+    """Wrap a string in characters that will display it as green when printed.
+    """
+    return "\033[0;32m%s\033[00m" % text
+
+def red_text(text):
+    """Wrap a string in characters that will display it as red when printed."""
+    return "\033[0;31m%s\033[00m" % text
 
 
 def get_test_files(subdir_name):
@@ -60,7 +70,19 @@ def get_test_names(subdir_name):
 
 def run_gen():
     """Run tests on generated data."""
-    raise Exception("nyi")
+    for test, out, ref in get_test_names(_GEN_DIR):
+        if os.path.exists(out):
+            shutil.rmtree(out)
+        os.makedirs(out)
+        child = subprocess.Popen([_BIN, _CONFIG, test, out, ref],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+        status = child.wait()
+        if status == 0:
+            print "%s: %s" % (green_text("Succeeded as expected"), test)
+            print "\tOutput found in %s" % out
+        else:
+            print "%s: %s" % (red_text("Unexpectedly failed"), test)
 
 
 def run_fail():
@@ -69,24 +91,48 @@ def run_fail():
         if os.path.exists(out):
             shutil.rmtree(out)
         os.makedirs(out)
-        child = subprocess.Popen(["./estimate", "test/config.json", test, out],
+        child = subprocess.Popen([_BIN, _CONFIG, test, out],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
         status = child.wait()
         if status == 0:
-            print "Unexpectedly succeeded: \033[0;31m%s\033[00m" % test
+            print "%s: %s" % (red_text("Unexpectedly succeeded"), test)
         else:
-            print "Failed as expected: \033[0;32m%s\033[00m" % test
+            print "%s: %s" % (green_text("Failed as expected"), test)
 
 
 def run_edge():
     """Run tests on working edge cases."""
-    raise Exception("nyi")
+    for test, out, _ in get_test_names(_EDGE_DIR):
+        if os.path.exists(out):
+            shutil.rmtree(out)
+        os.makedirs(out)
+        child = subprocess.Popen([_BIN, _CONFIG, test, out],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+        status = child.wait()
+        if status == 0:
+            print "%s: %s" % (green_text("Succeeded as expected"), test)
+            print "\tOutput found in %s" % out
+        else:
+            print "%s: %s" % (red_text("Unexpectedly failed"), test)
 
 
 def run_demo():
     """Run tests on given data."""
-    raise Exception("nyi")
+    for test, out, _ in get_test_names(_DEMO_DIR):
+        if os.path.exists(out):
+            shutil.rmtree(out)
+        os.makedirs(out)
+        child = subprocess.Popen([_BIN, _CONFIG, test, out],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+        status = child.wait()
+        if status == 0:
+            print "%s: %s" % (green_text("Succeeded as expected"), test)
+            print "\tOutput found in %s" % out
+        else:
+            print "%s: %s" % (red_text("Unexpectedly failed"), test)
 
 
 def main():
