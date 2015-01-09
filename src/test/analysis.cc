@@ -142,9 +142,11 @@ bool parse_params(const char *filename, analysis_params_t *params) {
         Json::Value iterations = sma[i]["iterations"];
         Json::Value samples = sma[i]["samples"];
         if (iterations.isInt() && samples.isInt()) {
-          int i = iterations.asInt();
-          int s = iterations.asInt();
-          if (i > 0 && s > 0) params->sma_params.push_back(sma_param_t(i, s));
+          int iter = iterations.asInt();
+          int samp = samples.asInt();
+          if (iter > 0 && samp > 0) {
+            params->sma_params.push_back(sma_param_t(iter, samp));
+          }
         }
       }
     }
@@ -156,10 +158,10 @@ bool parse_params(const char *filename, analysis_params_t *params) {
       Json::Value iterations = es[i]["iterations"];
       Json::Value smoothing = es[i]["smoothing"];
       if (iterations.isInt() && smoothing.isDouble()) {
-        int i = iterations.asInt();
-        double s = smoothing.asDouble();
-        if (i > 0 && s >= 0 && s <= 1) {
-          params->es_params.push_back(es_param_t(i, s));
+        int iter = iterations.asInt();
+        double smooth = smoothing.asDouble();
+        if (iter > 0 && smooth >= 0 && smooth <= 1) {
+          params->es_params.push_back(es_param_t(iter, smooth));
         }
       }
     }
