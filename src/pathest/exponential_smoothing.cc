@@ -13,7 +13,7 @@
 
 namespace pathest {
 
-double ExponentialSmoothing::smooth(double meas, double pred) {
+double ExponentialSmoothing::smooth(const double meas, const double pred) {
   return this->smoothing_ * meas + (1 - this->smoothing_) * pred;
 }
 

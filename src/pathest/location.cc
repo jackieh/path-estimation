@@ -6,7 +6,8 @@
 
 namespace pathest {
 
-Location::Location(double x, double y, double t) : x_(x), y_(y), t_(t) {}
+Location::Location(const double x, const double y, const double t) :
+  x_(x), y_(y), t_(t) {}
 
 bool Location::comp_x(const Location &loc1, const Location &loc2) {
   return loc1.x_ < loc2.x_;

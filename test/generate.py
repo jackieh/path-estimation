@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=W0141
 
 """Generates data points for a path following a mathematical function of x.
 
@@ -19,6 +20,7 @@ Example usage:
 """
 
 import decimal
+import json
 import math
 import numpy
 import optparse
@@ -26,6 +28,10 @@ import os
 import random
 
 _MAX_NUM_TESTS = 100
+
+_REPORT_TEMPLATE = {"target": "train"}
+
+_REPORT_KEY = "reports"
 
 _REPORT_BEGIN = """{
   "target": "train",
@@ -106,7 +112,7 @@ class DataGen:
             self.num = num
 
     @staticmethod
-    def __randomize_data(ref_x, ref_y):
+    def __randomize_coord((ref_x, ref_y)):
         """Return a randomized coordinate pair given a reference."""
         radius = numpy.random.normal(scale=DataGen.stdev_distance)
         angle = random.uniform(0, 2 * math.pi)
@@ -118,6 +124,17 @@ class DataGen:
     def __round(num):
         """Round a float down to the class precision."""
         return float(round(decimal.Decimal(num), DataGen.precision))
+
+    @staticmethod
+    def __make_json((time, (x_coord, y_coord))):
+        """Return a JSON object given a location report."""
+        return {'timestamp': time, 'x': x_coord, 'y': y_coord}
+
+    def __randomize_data(self):
+        """Return a randomized data set."""
+        times = map(lambda (t, _): t, self.data)
+        coords = map(lambda (_, c): c, self.data)
+        return zip(times, map(DataGen.__randomize_coord, coords))
 
     def __evaluate(self, var_x):
         """Return f(x) with hacks."""
@@ -156,31 +173,24 @@ class DataGen:
             delta_t = random.uniform(0, 1)
             (ref_x, ref_y) = self.__get_coords(ref_x, ref_y, delta_t)
             time += delta_t
-            self.data.append((ref_x, ref_y, time))
+            self.data.append((time, (ref_x, ref_y)))
 
     def write_ref(self, report_id):
         """Write reference data to files."""
+        reports = _REPORT_TEMPLATE.copy()
+        reports[_REPORT_KEY] = map(DataGen.__make_json, self.data)
         _, ref_filename = filename(report_id)
         ref_file = open(ref_filename, 'w')
-        ref_file.write(_REPORT_BEGIN)
-        for (i, (ref_x, ref_y, time)) in enumerate(self.data):
-            if i != 0:
-                ref_file.write(_REPORT_DELIMITER)
-            ref_file.write(_REPORT_POINT % (ref_y, time, ref_x))
-        ref_file.write(_REPORT_END)
+        ref_file.write(json.dumps(reports, indent=2))
         ref_file.close()
 
     def write_rand(self, report_id):
         """Write randomized data to files."""
+        reports = _REPORT_TEMPLATE.copy()
+        reports[_REPORT_KEY] = map(DataGen.__make_json, self.__randomize_data())
         rand_filename, _ = filename(report_id)
         rand_file = open(rand_filename, 'w')
-        rand_file.write(_REPORT_BEGIN)
-        for (i, (ref_x, ref_y, time)) in enumerate(self.data):
-            if i != 0:
-                rand_file.write(_REPORT_DELIMITER)
-            rand_x, rand_y = DataGen.__randomize_data(ref_x, ref_y)
-            rand_file.write(_REPORT_POINT % (rand_y, time, rand_x))
-        rand_file.write(_REPORT_END)
+        rand_file.write(json.dumps(reports, indent=2))
         rand_file.close()
 
 

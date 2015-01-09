@@ -1,6 +1,10 @@
 /// @file results.h
 /// @brief Class for writing data analysis results.
-/// @bug Needs more documentation.
+///
+/// Created once with the input data, used multiple times to write the analysis
+/// results (json file, plot image file, and summary in the results file) for
+/// each attempt to smooth the path.
+///
 //===----------------------------------------------------------------------===//
 
 #ifndef TEST_RESULTS_H_
@@ -21,6 +25,7 @@ class Results {
   std::string out_dir_;
   pathest::Path ref_data_;
 
+  // Coordinate bounds of the input data.
   double x_min_;
   double x_max_;
   double y_min_;

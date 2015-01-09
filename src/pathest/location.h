@@ -1,6 +1,5 @@
 /// @file location.h
 /// @brief Class for storing location data.
-/// @bug Needs documentation.
 //===----------------------------------------------------------------------===//
 
 #ifndef PATHEST_LOCATION_H_
@@ -10,21 +9,23 @@ namespace pathest {
 
 class Location {
  public:
-  Location(double x, double y, double t);
+  Location(const double x, const double y, const double t);
   ~Location() {}
 
+  // Comparison functions.
   static bool comp_x(const Location &loc1, const Location &loc2);
   static bool comp_y(const Location &loc1, const Location &loc2);
   static bool comp_t(const Location &loc1, const Location &loc2);
 
+  // Field access.
   double x() const;
   double y() const;
   double t() const;
 
  private:
-  double x_;
-  double y_;
-  double t_;
+  double x_;  //< The x coordinate.
+  double y_;  //< The y coordinate.
+  double t_;  //< Timestamp.
 };
 
 }  // namespace pathest

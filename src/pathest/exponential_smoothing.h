@@ -22,7 +22,7 @@ class ExponentialSmoothing {
   double pred_x_;  //< Last-predicted x coordinate.
   double pred_y_;  //< Last-predicted y coordinate.
   double smoothing_;  //< Smoothing factor.
-  double smooth(double meas, double pred);  //< Apply the smoothing factor.
+  double smooth(const double meas, const double pred);  //< Apply smoothing.
 };
 
 }  // namespace pathest

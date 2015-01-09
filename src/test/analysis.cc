@@ -88,7 +88,7 @@ void perform_analysis(const char *config, const pathest::Path &input,
       int iterations = it->first;
       int samples = it->second;
       for (int i = 0; i < iterations; ++i) {
-        est_data = est_data.simple_moving_average(samples);
+        est_data = est_data.sma_path(samples);
       }
       std::vector<char> name(sma_name_len);
       std::vector<char> title(sma_title_len);
@@ -106,7 +106,7 @@ void perform_analysis(const char *config, const pathest::Path &input,
       int iterations = it->first;
       double smoothing = it->second;
       for (int i = 0; i < iterations; ++i) {
-        est_data = est_data.exponential_smoothing(smoothing);
+        est_data = est_data.es_path(smoothing);
       }
       std::vector<char> name(es_name_len);
       std::vector<char> title(es_title_len);
@@ -118,7 +118,7 @@ void perform_analysis(const char *config, const pathest::Path &input,
 
     // Kalman filter analysis.
     if (params.use_kf) {
-      est_data = input.kalman_filter();
+      est_data = input.kf_path();
       res.write(kf_name, kf_title, est_data);
     }
   }
