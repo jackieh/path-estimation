@@ -21,6 +21,9 @@ The test code which uses the library has the following dependencies.
 The Makefile has a `test` target to compile a test program that uses the
 library. The `run` target will run the test code on an example input.
 
+For more thorough testing, `python test/driver.py --all` can be run to produce
+results for every available test case.
+
 ### Documentation
 
 The `docs` target in the Makefile will generate doxygen documentation.

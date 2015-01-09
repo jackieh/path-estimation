@@ -137,6 +137,12 @@ def run_demo():
 
 def main():
     """Process command line options."""
+    if not os.path.exists(_BIN):
+        print "I can't find the binary. Did you run 'make test'?"
+        return
+    if not os.path.exists(_CONFIG):
+        print "I can't find the config file. It should be included in the repo."
+        return
     parser = optparse.OptionParser()
     parser.add_option("-g", "--gen", action="store_true", dest="gen",
                       help="Run test on generated data")
